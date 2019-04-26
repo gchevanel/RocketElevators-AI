@@ -15,7 +15,7 @@
         },
         {
           "name": "AMAZON.HelpIntent",
-          "samples": []
+          "samples": ["help"]
         },
         {
           "name": "AMAZON.StopIntent",
@@ -30,6 +30,20 @@
             }
           ],
           "samples": ["what is the status of elevator {id}"]
+        },
+        {
+          "name": "ChangeStatusIntent",
+          "slots": [
+            {
+              "name": "id",
+              "type": "AMAZON.NUMBER"
+            },
+            {
+              "name": "status",
+              "type": "AMAZON.CreativeWorkType"
+            }
+          ],
+          "samples": ["change elevator {id} status for {status}"]
         },
         {
           "name": "GetRemoteDataIntent",

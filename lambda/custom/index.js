@@ -2,14 +2,72 @@
 /* eslint-disable  no-console */
 
 const Alexa = require("ask-sdk-core");
+const http = require("https");
 
+// ----- the 2 next function are to change elevator status with id and status -----
+const ChangeStatusHandler = {
+  canHandle(handlerInput) {
+    return (
+      handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+      handlerInput.requestEnvelope.request.intent.name === "ChangeStatusIntent"
+    );
+  },
+  async handle(handlerInput) {
+    const elevatorID =
+      handlerInput.requestEnvelope.request.intent.slots.id.value;
+    const status =
+      handlerInput.requestEnvelope.request.intent.slots.status.value;
+    var capitalizedStatus = uppercaseFirstCharacter(status);
+
+    var result = await httpPutElevatorStatus(elevatorID, capitalizedStatus);
+
+    let say = result;
+
+    return handlerInput.responseBuilder
+      .speak(say)
+      .reprompt()
+      .getResponse();
+  }
+};
+async function httpPutElevatorStatus(elevatorID, capitalizedStatus) {
+  return new Promise((resolve, reject) => {
+    const putData = `{"id":"${elevatorID}","status":"${capitalizedStatus}"}`;
+    console.log(elevatorID, capitalizedStatus);
+    var options = {
+      host: "rocketelevatorsgab.azurewebsites.net", // here is the end points
+      path: `/api/elevator/${elevatorID}`,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(putData)
+      },
+      method: "PUT"
+    };
+    var req = http.request(options, res => {
+      var responseString = "";
+      res.on("data", chunk => {
+        responseString = responseString + chunk;
+      });
+      res.on("end", () => {
+        console.log("Received: " + responseString);
+        resolve(responseString);
+      });
+      res.on("error", e => {
+        console.log("ERROR: " + e);
+        reject();
+      });
+    });
+    req.write(putData);
+    req.end();
+  });
+}
+
+// here is the greating message hello there. how can i help you today
 const GetLaunchHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === "LaunchRequest";
   },
   handle(handlerInput) {
     const speechText = "Hello there. How can i help you today?";
-
     return handlerInput.responseBuilder
       .speak(speechText)
       .reprompt()
@@ -17,6 +75,7 @@ const GetLaunchHandler = {
   }
 };
 
+// ---
 const GetStatusHandler = {
   canHandle(handlerInput) {
     return (
@@ -26,6 +85,13 @@ const GetStatusHandler = {
   async handle(handlerInput) {
     let outputSpeech = "This is the default message.";
     const id = handlerInput.requestEnvelope.request.intent.slots.id.value;
+    if (id > 200) {
+      outputSpeech = "Please enter a valid number";
+      return handlerInput.responseBuilder
+        .speak(outputSpeech)
+        .reprompt()
+        .getResponse();
+    }
 
     const elevatorStatus = await getRemoteElevatorData(
       "https://rocketelevatorsgab.azurewebsites.net/api/elevator/" + id
@@ -35,7 +101,7 @@ const GetStatusHandler = {
 
     // const customer = JSON.parse(c);
 
-    outputSpeech = `Thew status of elevator ${id} is ${elevator} `;
+    outputSpeech = `The status of elevator ${id} is ${elevator} `;
 
     return handlerInput.responseBuilder
       .speak(outputSpeech)
@@ -122,7 +188,8 @@ const HelpIntentHandler = {
     );
   },
   handle(handlerInput) {
-    const speechText = "You can introduce yourself by telling me your name";
+    const speechText =
+      "Here is the list of all commands : how rocket elevators is going, what is the status of elevator {id},  change elevator {id} status for {status}";
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -298,7 +365,11 @@ exports.handler = skillBuilder
     HelpIntentHandler,
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,
+    ChangeStatusHandler,
     GetStatusHandler
   )
   .addErrorHandlers(ErrorHandler)
   .lambda();
+function uppercaseFirstCharacter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}

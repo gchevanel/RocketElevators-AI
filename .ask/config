@@ -21,7 +21,7 @@
         },
         "interactionModel": {
           "en-US": {
-            "eTag": "5cdfe815eb470d11d6db8e5fe7b8f723"
+            "eTag": "7853f68c9650bc204ae0ce3b8c23068b"
           }
         },
         "lambda": [
@@ -34,7 +34,7 @@
             "codeUri": "lambda/custom",
             "functionName": "ask-custom-RocketElevator-default",
             "handler": "index.handler",
-            "revisionId": "465d5f39-36df-454e-9445-2fd1edde4786",
+            "revisionId": "d4229d54-c8b5-407a-b665-5ff4a34c8c7a",
             "runtime": "nodejs8.10"
           }
         ]
