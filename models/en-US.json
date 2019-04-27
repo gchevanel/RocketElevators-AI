@@ -29,7 +29,10 @@
               "type": "AMAZON.NUMBER"
             }
           ],
-          "samples": ["what is the status of elevator {id}"]
+          "samples": [
+            "what is the status of elevator {id}",
+            "Can you tell me the status of elevator {id}"
+          ]
         },
         {
           "name": "ChangeStatusIntent",
@@ -43,12 +46,47 @@
               "type": "AMAZON.CreativeWorkType"
             }
           ],
-          "samples": ["change elevator {id} status for {status}"]
+          "samples": [
+            "change elevator {id} status to {status}",
+            "change status to {status} for elevator {id}"
+          ]
         },
         {
           "name": "GetRemoteDataIntent",
           "slots": [],
-          "samples": ["how rocket elevators is going"]
+          "samples": [
+            "how rocket elevators is going",
+            "what happen at rocket elevators",
+            "what is going on"
+          ]
+        },
+        {
+          "name": "GetElevatorSnIntent",
+          "slots": [
+            {
+              "name": "id",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "what is the serial number of elevator {id}",
+            "what is the SN of elevator {id}",
+            "can you tell me the serial number of elevator {id}"
+          ]
+        },
+        {
+          "name": "GetElevatorInformationIntent",
+          "slots": [
+            {
+              "name": "id",
+              "type": "AMAZON.NUMBER"
+            }
+          ],
+          "samples": [
+            "give me some information about elevator {id}",
+            "what happen with the elevator {id}",
+            "can you tell me some information about elevator {id}"
+          ]
         }
       ]
     }

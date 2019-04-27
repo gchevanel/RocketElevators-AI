@@ -29,6 +29,7 @@ const ChangeStatusHandler = {
       .getResponse();
   }
 };
+
 async function httpPutElevatorStatus(elevatorID, capitalizedStatus) {
   return new Promise((resolve, reject) => {
     const putData = `{"id":"${elevatorID}","status":"${capitalizedStatus}"}`;
@@ -75,7 +76,7 @@ const GetLaunchHandler = {
   }
 };
 
-// ---
+// ----- here is to find the elevator status of a elevator specific-----
 const GetStatusHandler = {
   canHandle(handlerInput) {
     return (
@@ -99,8 +100,6 @@ const GetStatusHandler = {
 
     const elevator = JSON.parse(elevatorStatus).status;
 
-    // const customer = JSON.parse(c);
-
     outputSpeech = `The status of elevator ${id} is ${elevator} `;
 
     return handlerInput.responseBuilder
@@ -109,6 +108,7 @@ const GetStatusHandler = {
       .getResponse();
   }
 };
+// ----- here is where we make all get for the big sentence -----
 
 const GetRemoteDataHandler = {
   canHandle(handlerInput) {
@@ -180,6 +180,82 @@ const GetRemoteDataHandler = {
   }
 };
 
+// ----- here is where i get the elevator serial number -----
+
+const GetElevatorSnHandler = {
+  canHandle(handlerInput) {
+    return (
+      handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+      handlerInput.requestEnvelope.request.intent.name === "GetElevatorSnIntent"
+    );
+  },
+  async handle(handlerInput) {
+    let outputSpeech = "This is the default message.";
+    const id = handlerInput.requestEnvelope.request.intent.slots.id.value;
+    if (id > 200) {
+      outputSpeech = "Please enter a valid number";
+      return handlerInput.responseBuilder
+        .speak(outputSpeech)
+        .reprompt()
+        .getResponse();
+    }
+
+    const elevatorAllData = await getRemoteElevatorAllData(
+      "https://rocketelevatorsgab.azurewebsites.net/api/elevator/" + id
+    );
+
+    const elevatorserial = JSON.parse(elevatorAllData).serial_number;
+
+    outputSpeech = `the serial number of elevator ${id} is ${elevatorserial}`;
+
+    return handlerInput.responseBuilder
+      .speak(outputSpeech)
+      .reprompt()
+      .getResponse();
+  }
+};
+
+// ----- here is where i get the elevator information -----
+
+const GetElevatorInformationHandler = {
+  canHandle(handlerInput) {
+    return (
+      handlerInput.requestEnvelope.request.type === "IntentRequest" &&
+      handlerInput.requestEnvelope.request.intent.name ===
+        "GetElevatorInformationIntent"
+    );
+  },
+  async handle(handlerInput) {
+    let outputSpeech = "This is the default message.";
+    const id = handlerInput.requestEnvelope.request.intent.slots.id.value;
+    if (id > 200) {
+      outputSpeech = "Please enter a valid number";
+      return handlerInput.responseBuilder
+        .speak(outputSpeech)
+        .reprompt()
+        .getResponse();
+    }
+
+    const elevatorAllData = await getRemoteElevatorAllData(
+      "https://rocketelevatorsgab.azurewebsites.net/api/elevator/" + id
+    );
+
+    const elevatorserial = JSON.parse(elevatorAllData).serial_number;
+    const elevatorstatus = JSON.parse(elevatorAllData).status;
+    const elevatorclass = JSON.parse(elevatorAllData).elevator_class;
+    const elevatortype = JSON.parse(elevatorAllData).elevator_type;
+
+    outputSpeech = `the elevator ${id} status is ${elevatorstatus} with serial number ${elevatorserial}
+    . The elevator class is ${elevatorclass} with the type of ${elevatortype}`;
+
+    return handlerInput.responseBuilder
+      .speak(outputSpeech)
+      .reprompt()
+      .getResponse();
+  }
+};
+// ----- here is for the help commands -----
+
 const HelpIntentHandler = {
   canHandle(handlerInput) {
     return (
@@ -189,7 +265,7 @@ const HelpIntentHandler = {
   },
   handle(handlerInput) {
     const speechText =
-      "Here is the list of all commands : how rocket elevators is going, what is the status of elevator {id},  change elevator {id} status for {status}";
+      "Here is the list of all commands : what is the status of elevator {id},Can you tell me the status of elevator {id}, change elevator {id} status to {status}, change status to {status} for elevator {id}, how rocket elevators is going, what happen at rocket elevators, what is going on, what is the serial number of elevator {id}, what is the SN of elevator {id}, can you tell me the serial number of elevator {id}, give me some information about elevator {id}, what happen with the elevator {id}, can you tell me some information about elevator {id}";
 
     return handlerInput.responseBuilder
       .speak(speechText)
@@ -366,6 +442,8 @@ exports.handler = skillBuilder
     CancelAndStopIntentHandler,
     SessionEndedRequestHandler,
     ChangeStatusHandler,
+    GetElevatorSnHandler,
+    GetElevatorInformationHandler,
     GetStatusHandler
   )
   .addErrorHandlers(ErrorHandler)
